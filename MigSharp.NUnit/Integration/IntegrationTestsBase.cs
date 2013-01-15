@@ -402,6 +402,7 @@ namespace MigSharp.NUnit.Integration
         /// </summary>
         private DataTable GetTable(string tableName)
         {
+            // Bug: Need to know how to get a schema table
             var table = new DataTable(tableName) { Locale = CultureInfo.InvariantCulture };
             try
             {

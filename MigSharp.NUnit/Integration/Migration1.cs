@@ -7,7 +7,7 @@ namespace MigSharp.NUnit.Integration
     {
         public void Up(IDatabase db)
         {
-            db.CreateTable(Tables[0].Name).OnSchema("Schema1")
+            db.CreateTable(Tables[0].Name)
                 .WithPrimaryKeyColumn(Tables[0].Columns[0], DbType.Int32);
         }
 

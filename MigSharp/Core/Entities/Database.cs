@@ -9,6 +9,7 @@ namespace MigSharp.Core.Entities
         private readonly IMigrationContext _context;
         private readonly MigrateCommand _root = new MigrateCommand();
         private readonly TableCollection _tables;
+        private string _schemaName;
 
         internal ICommand Root { get { return _root; } }
 
@@ -24,8 +25,16 @@ namespace MigSharp.Core.Entities
         public ICreatedTable CreateTable(string tableName, string primaryKeyConstraintName)
         {
             var createTableCommand = new CreateTableCommand(_root, tableName, primaryKeyConstraintName);
+            if (!string.IsNullOrEmpty(_schemaName))
+                createTableCommand.SchemaName = _schemaName;
             _root.Add(createTableCommand);
             return new CreatedTable(createTableCommand);
+        }
+
+        public IDatabase OnSchema(string schemaName)
+        {
+            _schemaName = schemaName;
+            return this;
         }
 
         public void Execute(string query)

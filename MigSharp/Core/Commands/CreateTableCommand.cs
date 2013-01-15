@@ -30,6 +30,7 @@ namespace MigSharp.Core.Commands
             {
                 throw new InvalidCommandException("At least one column must be added to the CreateTable command.");
             }
+            provider.SchemaName = SchemaName;
             return provider.CreateTable(
                 _tableName,
                 createColumnCommands.Select(c => new CreatedColumn(

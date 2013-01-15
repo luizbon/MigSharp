@@ -26,6 +26,12 @@ namespace MigSharp
         ICreatedTable CreateTable(string tableName, string primaryKeyConstraintName);
 
         /// <summary>
+        /// Change the scope to specific schema
+        /// </summary>
+        /// <param name="schemaName">The name of the schema</param>
+        IDatabase OnSchema(string schemaName);
+
+        /// <summary>
         /// Executes a custom query.
         /// </summary>
         /// <param name="query">Custom SQL which must be understood by all providers that should be supported by this migration.</param>
