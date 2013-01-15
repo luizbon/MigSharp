@@ -36,10 +36,10 @@ namespace MigSharp
         /// </summary>
         int MaximumDbObjectNameLength { get; }
 
-        ///// <summary>
-        ///// Gets the identifier pattern for the database.
-        ///// </summary>
-        //string IdentifierPattern { get; }
+        /// <summary>
+        /// Gets a command-text to be executed on opening the connection to the database to enable ANSI quoting.
+        /// </summary>
+        string EnableAnsiQuotesCommand { get; }
     }
 
     internal static class ProviderMetadataExtensions

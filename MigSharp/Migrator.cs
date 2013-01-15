@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
@@ -26,6 +27,8 @@ namespace MigSharp
         private IVersioning _customVersioning;
         private IBootstrapper _customBootstrapper;
 
+        internal DbConnectionFactory ConnectionFactory { get { return _dbConnectionFactory; } }
+
         /// <summary>
         /// Initializes a new instance of <see cref="Migrator"/>.
         /// </summary>
@@ -40,7 +43,7 @@ namespace MigSharp
 
             _provider = options.SupportedProviders.GetProvider(providerName, out _providerMetadata);
 
-            _connectionInfo = new ConnectionInfo(connectionString, _providerMetadata.InvariantName, _providerMetadata.SupportsTransactions);
+            _connectionInfo = new ConnectionInfo(connectionString, _providerMetadata.InvariantName, _providerMetadata.SupportsTransactions, _providerMetadata.EnableAnsiQuotesCommand);
             _options = options;
         }
 
@@ -140,7 +143,8 @@ namespace MigSharp
         {
             // import all migrations
             DateTime start = DateTime.Now;
-            IEnumerable<ImportedMigration> availableMigrations = ImportAllMigrations(catalog);
+            var timestampProviders = InitializeTimestampProviders(catalog);
+            IEnumerable<ImportedMigration> availableMigrations = ImportAllMigrations(catalog, timestampProviders);
             Log.Verbose(LogCategory.Performance, "Importing migrations took {0}s", (DateTime.Now - start).TotalSeconds);
 
             // initialize command execution/scripting dispatching
@@ -164,6 +168,31 @@ namespace MigSharp
                 _options);
         }
 
+        private static IDictionary<string, IMigrationTimestampProvider> InitializeTimestampProviders(ComposablePartCatalog catalog)
+        {
+            // get timestamp providers from the MEF catalog
+            var container = new CompositionContainer(catalog);
+            var providers = container.GetExports<IMigrationTimestampProvider, IMigrationTimestampProviderExportMetadata>();
+            var result = new Dictionary<string, IMigrationTimestampProvider>();
+            foreach (var provider in providers)
+            {
+                if (result.ContainsKey(provider.Metadata.ModuleName))
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, "Cannot have more than one timestamp provider responsible for module: '{0}'.", provider.Metadata.ModuleName));                    
+                }
+                else
+                {
+                    result.Add(provider.Metadata.ModuleName, provider.Value);
+                }
+            }
+            // add default timestamp provider if needed
+            if (!result.ContainsKey(MigrationExportAttribute.DefaultModuleName))
+            {
+                result.Add(MigrationExportAttribute.DefaultModuleName, new DefaultMigrationTimestampProvider());
+            }
+            return result;
+        }
+
         private IVersioning InitializeVersioning(ComposablePartCatalog catalog, ISqlDispatcher dispatcher)
         {
             IVersioning versioning;
@@ -185,6 +214,7 @@ namespace MigSharp
 
         private void ApplyCustomBootstrapping(Versioning versioning, ComposablePartCatalog catalog)
         {
+            var timestampProviders = InitializeTimestampProviders(catalog);
             using (IDbConnection connection = _dbConnectionFactory.OpenConnection(_connectionInfo))
             {
                 using (IDbTransaction transaction = _connectionInfo.SupportsTransactions ? connection.BeginTransaction() : null)
@@ -192,7 +222,7 @@ namespace MigSharp
                     _customBootstrapper.BeginBootstrapping(connection, transaction);
 
                     // bootstrapping is a "global" operation; therefore we need to call IsContained on *all* migrations
-                    var allMigrations = ImportAllMigrations(catalog)
+                    var allMigrations = ImportAllMigrations(catalog, timestampProviders)
                         .Select(m => m.Metadata);
                     var migrationsContainedAtBootstrapping = from m in allMigrations
                                                              where _customBootstrapper.IsContained(m)
@@ -229,6 +259,23 @@ namespace MigSharp
             _customBootstrapper = customBootstrapper;
         }
 
+        /// <summary>
+        /// <para>Injects an existing connection which is used for all database accesses without opening or closing it. In this case,
+        /// the provided ConnectionString will be ignored.</para>
+        /// <para>The caller is responsible for opening the connection before executing the migrations and disposing the connection afterwards.</para>
+        /// <para>Use this method only if you really have to.</para>
+        /// </summary>
+        /// <remarks>
+        /// SQLite in-memory databases require the connection to be open all the time (see https://github.com/dradovic/MigSharp/pull/38).
+        /// </remarks>
+        /// <param name="connection">The connection to be used.</param>
+        public void UseCustomConnection(IDbConnection connection)
+        {
+            if (connection == null) throw new ArgumentNullException("connection");
+
+            _dbConnectionFactory.UseCustomConnection(connection);
+        }
+
         private static ComposablePartCatalog CreateCatalog<T>(IEnumerable<T> assemblies, Func<T, ComposablePartCatalog> createCatalogFor, Func<T, string> getAssemblyName)
         {
             var catalog = new AggregateCatalog();
@@ -240,15 +287,24 @@ namespace MigSharp
             return catalog;
         }
 
-        private static IEnumerable<ImportedMigration> ImportAllMigrations(ComposablePartCatalog catalog)
+        private static IEnumerable<ImportedMigration> ImportAllMigrations(ComposablePartCatalog catalog, IDictionary<string, IMigrationTimestampProvider> timestampProviders)
         {
             Log.Info("Importing migrations...");
             var container = new CompositionContainer(catalog);
             IEnumerable<Lazy<IMigration, IMigrationExportMetadata>> migrations = container.GetExports<IMigration, IMigrationExportMetadata>();
+
             var result = new List<ImportedMigration>(migrations
-                .Select(l => new ImportedMigration(l.Value, new MigrationMetadata(l.Value.GetType().GetTimestamp(), l.Metadata.ModuleName, l.Metadata.Tag))));
+                .Select(l =>
+                        {
+                            var timestampProvider = timestampProviders.ContainsKey(l.Metadata.ModuleName)
+                                                        ? timestampProviders[l.Metadata.ModuleName]
+                                                        : timestampProviders[MigrationExportAttribute.DefaultModuleName];
+
+                            return new ImportedMigration(l.Value, new MigrationMetadata(timestampProvider.GetTimestamp(l.Value.GetType()), l.Metadata.ModuleName, l.Metadata.Tag));
+                        }));
             Log.Info("Found {0} migration(s)", result.Count);
             return result;
+            
         }
     }
 }
