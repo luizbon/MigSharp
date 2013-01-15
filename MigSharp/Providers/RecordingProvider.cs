@@ -186,6 +186,8 @@ namespace MigSharp.Providers
             return string.Format(CultureInfo.InvariantCulture, "\"{0}\"", name);
         }
 
+        public string SchemaName { get; set; }
+
         #endregion
 
         private void AddNewObjectNames(params string[] names)

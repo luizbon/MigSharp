@@ -14,7 +14,7 @@ namespace MigSharp.Providers
         private const string Identation = "\t";
 
         public abstract bool SpecifyWith { get; }
-        public abstract string Dbo { get; }
+        public abstract string SchemaName { get; set; }
 
         public abstract string ExistsTable(string databaseName, string tableName);
 
@@ -22,7 +22,7 @@ namespace MigSharp.Providers
         {
             return SqlScriptingHelper.ToSql(value, targetDbType);
         }
-
+        
         public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName)
         {
             string commandText = string.Empty;
@@ -100,7 +100,7 @@ namespace MigSharp.Providers
 
         public IEnumerable<string> DropTable(string tableName)
         {
-            yield return string.Format(CultureInfo.InvariantCulture, "DROP TABLE {0}{1}", Dbo, Escape(tableName));
+            yield return string.Format(CultureInfo.InvariantCulture, "DROP TABLE {0}.{1}", Escape(SchemaName), Escape(tableName));
         }
 
         public IEnumerable<string> AddColumn(string tableName, Column column)
@@ -164,7 +164,7 @@ namespace MigSharp.Providers
 
         public virtual IEnumerable<string> DropColumn(string tableName, string columnName)
         {
-            yield return string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0}{1} DROP COLUMN {2}", Dbo, Escape(tableName), Escape(columnName));
+            yield return string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0}.{1} DROP COLUMN {2}", Escape(SchemaName), Escape(tableName), Escape(columnName));
         }
 
         public IEnumerable<string> AlterColumn(string tableName, Column column)
@@ -188,12 +188,12 @@ namespace MigSharp.Providers
 
         public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName)
         {
-            yield return string.Format(CultureInfo.InvariantCulture, "CREATE INDEX {0} ON {4}{1} {2}({2}\t{3}{2}){5}",
+            yield return string.Format(CultureInfo.InvariantCulture, "CREATE INDEX {0} ON {4}.{1} {2}({2}\t{3}{2}){5}",
                 Escape(indexName),
                 Escape(tableName),
                 Environment.NewLine,
                 string.Join(string.Format(CultureInfo.InvariantCulture, ",{0}\t", Environment.NewLine), columnNames.Select(Escape).ToArray()),
-                Dbo,
+                Escape(SchemaName),
                 SpecifyWith ? "WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF)" : string.Empty);
         }
 
@@ -259,12 +259,12 @@ namespace MigSharp.Providers
 
         private string CreateTable(string tableName)
         {
-            return string.Format(CultureInfo.InvariantCulture, "CREATE TABLE {0}{1}", Dbo, Escape(tableName));
+            return string.Format(CultureInfo.InvariantCulture, "CREATE TABLE {0}.{1}", Escape(SchemaName), Escape(tableName));
         }
 
         private string AlterTable(string tableName)
         {
-            return string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0}{1}", Dbo, Escape(tableName));
+            return string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0}.{1}", Escape(SchemaName), Escape(tableName));
         }
 
         public string Escape(string name)

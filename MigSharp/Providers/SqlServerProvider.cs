@@ -28,8 +28,18 @@ namespace MigSharp.Providers
     [Supports(DbType.StringFixedLength, MaximumSize = 4000, CanBeUsedAsPrimaryKey = true)]
     internal abstract class SqlServerProvider : SqlServerProviderBase
     {
+        private string _schemaName;
         public override bool SpecifyWith { get { return true; } }
-        public override string Dbo { get { return "[dbo]."; } }
+        public override string SchemaName { 
+            get
+            {
+                return string.IsNullOrEmpty(_schemaName) ? "dbo" : _schemaName;
+            }
+            set
+            {
+                _schemaName = value;
+            } 
+        }
 
         public override string ExistsTable(string databaseName, string tableName)
         {

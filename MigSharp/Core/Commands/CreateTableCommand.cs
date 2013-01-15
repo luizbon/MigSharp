@@ -13,6 +13,8 @@ namespace MigSharp.Core.Commands
 
         public string TableName { get { return _tableName; } }
 
+        public string SchemaName { get; set; }
+
         public CreateTableCommand(ICommand parent, string tableName, string primaryKeyConstraintName)
             : base(parent)
         {

@@ -350,6 +350,8 @@ namespace MigSharp.NUnit.Process
                 return string.Format("\"{0}\"", name);
             }
 
+            public string SchemaName { get; set; }
+
             #endregion
         }
     }

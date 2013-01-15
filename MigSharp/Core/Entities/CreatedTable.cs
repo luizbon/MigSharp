@@ -82,5 +82,12 @@ namespace MigSharp.Core.Entities
             command.DefaultValue = value;
             return this;
         }
+
+        public string Schema { get { return _command.SchemaName; } }
+        public ICreatedTableBase OnSchema(string schemaName)
+        {
+            _command.SchemaName = schemaName;
+            return this;
+        }
     }
 }

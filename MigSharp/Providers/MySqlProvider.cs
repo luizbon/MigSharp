@@ -305,6 +305,13 @@ namespace MigSharp.Providers
             return DropDefaultConstraint(tableName, column.Name, false);
         }
 
+        string IProvider.Escape(string name)
+        {
+            return Escape(name);
+        }
+
+        public string SchemaName { get; set; }
+
         protected string DropConstraint(string tableName, string constraintName)
         {
             return AlterTable(tableName) + string.Format(CultureInfo.InvariantCulture, " DROP CONSTRAINT [{0}]", constraintName);

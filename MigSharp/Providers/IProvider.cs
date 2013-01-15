@@ -31,6 +31,7 @@ namespace MigSharp.Providers
         /// <param name="tableName">The name of the new table.</param>
         /// <param name="columns">The columns of the new table.</param>
         /// <param name="primaryKeyConstraintName">Empty if there are no primary key columns.</param>
+        /// <param name="schemaName">The schema of the new table</param>
         /// <returns>The SQL commands to be executed.</returns>
         IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName);
 
@@ -136,6 +137,8 @@ namespace MigSharp.Providers
         /// <param name="name">value to escape</param>
         /// <returns></returns>
         string Escape(string name);
+
+        string SchemaName { get; set; }
     }
 
     internal static class ProviderExtensions

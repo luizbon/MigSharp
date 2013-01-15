@@ -291,7 +291,7 @@ namespace MigSharp.SqlServer.NUnit
             return AddConstraint(tableName, constraintName, IndexKeyType.DriUniqueKey, columnNames);
         }
 
-        private static IEnumerable<string> AddConstraint(string tableName, string constraintName, IndexKeyType keyType, IEnumerable<string> columnNames)
+        private IEnumerable<string> AddConstraint(string tableName, string constraintName, IndexKeyType keyType, IEnumerable<string> columnNames)
         {
             Table table = GetTable(tableName);
             Index uniqueConstraint = new Index(table, constraintName) { IndexKeyType = keyType };
@@ -329,7 +329,9 @@ namespace MigSharp.SqlServer.NUnit
             return string.Format("[{0}]", name);
         }
 
-        private static IEnumerable<string> DropConstraint(string tableName, string constraintName, IndexKeyType keyType)
+        public string SchemaName { get; set; }
+
+        private IEnumerable<string> DropConstraint(string tableName, string constraintName, IndexKeyType keyType)
         {
             Table table = GetTable(tableName);
             Index uniqueConstraint = new Index(table, constraintName) { IndexKeyType = keyType };
@@ -337,9 +339,9 @@ namespace MigSharp.SqlServer.NUnit
             return ScriptChanges(table.Parent.Parent);
         }
 
-        private static Table GetTable(string tableName)
+        private Table GetTable(string tableName)
         {
-            return new Table(GetDatabase(), tableName);
+            return new Table(GetDatabase(), tableName, SchemaName);
         }
 
         private static Database GetDatabase()

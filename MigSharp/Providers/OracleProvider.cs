@@ -384,6 +384,8 @@ namespace MigSharp.Providers
             return string.Format(CultureInfo.InvariantCulture, "\"{0}\"", name);
         }
 
+        public string SchemaName { get; set; }
+
         private static string GetTypeSpecifier(DataType type)
         {
             switch (type.DbType)

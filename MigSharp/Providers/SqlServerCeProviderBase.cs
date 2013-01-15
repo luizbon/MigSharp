@@ -30,7 +30,7 @@ namespace MigSharp.Providers
     internal class SqlServerCeProviderBase : SqlServerProviderBase
     {
         public override bool SpecifyWith { get { return false; } }
-        public override string Dbo { get { return string.Empty; } }
+        public override string SchemaName { get { return string.Empty; } set { throw new NotSupportedException(); } }
 
         public override string ExistsTable(string databaseName, string tableName)
         {
