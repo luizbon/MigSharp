@@ -27,7 +27,7 @@ namespace MigSharp.Core.Commands
                 throw new InvalidCommandException("At least one column must be added to the AddForeignKeyTo command.");
             }
             string effectiveConstraintName = GetEffectiveConstraintName();
-            return provider.AddForeignKey(Parent.TableName, _referencedTableName, _columnNames.Select(p => new ColumnReference(p.Key, p.Value)), effectiveConstraintName);
+            return provider.AddForeignKey(Parent.TableName, _referencedTableName, _columnNames.Select(p => new ColumnReference(p.Key, p.Value)), effectiveConstraintName, SchemaName);
         }
 
         private string GetEffectiveConstraintName()

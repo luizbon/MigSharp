@@ -6,5 +6,6 @@ namespace MigSharp.Core
     {
         void Add(ICommand child);
         IEnumerable<ICommand> Children { get; }
+        string SchemaName { get; }
     }
 }

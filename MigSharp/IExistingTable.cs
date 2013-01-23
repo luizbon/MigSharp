@@ -58,13 +58,16 @@ namespace MigSharp
         /// </summary>
         /// <param name="referencedTableName">The name of the referenced table.</param>
         /// <param name="constraintName">Optionally, the name of the foreign key constraint. If null or empty, a default name will be generated.</param>
-        IAddedForeignKey AddForeignKeyTo(string referencedTableName, string constraintName);
+        /// <param name="schemaName">Optionally, the referenced table schema name</param>
+        IAddedForeignKey AddForeignKeyTo(string referencedTableName, string constraintName, string schemaName = null);
 
         /// <summary>
         /// Adds an unique constraint to the table.
         /// </summary>
         /// <param name="constraintName">Optionally, the name of the unique constraint. If null or empty, a default name will be generated.</param>
         IAddedUniqueConstraint AddUniqueConstraint(string constraintName);
+
+        string Schema { get; set; }
     }
 
     /// <summary>
@@ -103,7 +106,7 @@ namespace MigSharp
         /// <param name="referencedTableName">The name of the referenced table.</param>
         public static IAddedForeignKey AddForeignKeyTo(this IExistingTable table, string referencedTableName)
         {
-            return table.AddForeignKeyTo(referencedTableName, null);
+            return table.AddForeignKeyTo(referencedTableName, null, null);
         }
 
         /// <summary>
@@ -128,6 +131,12 @@ namespace MigSharp
         public static IForeignKey ForeignKeyTo(this IExistingTable table, string referencedTableName)
         {
             return table.ForeignKeys[DefaultObjectNameProvider.GetForeignKeyConstraintName(table.TableName, referencedTableName, null)];
+        }
+
+        public static IExistingTable OnSchema(this IExistingTable table, string schemaName)
+        {
+            table.Schema = schemaName;
+            return table;
         }
     }
 }

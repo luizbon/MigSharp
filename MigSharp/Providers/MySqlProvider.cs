@@ -250,7 +250,7 @@ namespace MigSharp.Providers
             yield return string.Format(CultureInfo.InvariantCulture, "DROP INDEX {0} ON [dbo].{1} WITH ( ONLINE = OFF )", Escape(indexName), Escape(tableName));            
         }
 
-        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName)
+        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null)
         {
             yield return AlterTable(tableName) + string.Format(CultureInfo.InvariantCulture, "  ADD  CONSTRAINT [{0}] FOREIGN KEY({1}){2}REFERENCES {3} ({4})",
                 constraintName,

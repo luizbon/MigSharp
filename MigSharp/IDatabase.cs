@@ -24,13 +24,7 @@ namespace MigSharp
         /// <param name="tableName">The name of the new table.</param>
         /// <param name="primaryKeyConstraintName">Optionally, the name of the primary key constraint.</param>
         ICreatedTable CreateTable(string tableName, string primaryKeyConstraintName);
-
-        /// <summary>
-        /// Change the scope to specific schema
-        /// </summary>
-        /// <param name="schemaName">The name of the schema</param>
-        IDatabase OnSchema(string schemaName);
-
+        
         /// <summary>
         /// Executes a custom query.
         /// </summary>

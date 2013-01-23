@@ -27,8 +27,15 @@ namespace MigSharp.NUnit.Integration
 
             db.Execute(string.Format("CREATE SCHEMA {0}", schemaName));
 
-            var table = db.OnSchema(schemaName).CreateTable(Tables[0].Name)
+            var table = db.CreateTable(Tables[0].Name).OnSchema(schemaName)
                 .WithPrimaryKeyColumn(Tables[0].Columns[0], DbType.Int32);
+
+            db.CreateTable(Tables[1].Name)
+              .WithPrimaryKeyColumn(Tables[1].Columns[0], DbType.Int32)
+              .WithNotNullableColumn(Tables[1].Columns[1], DbType.Int32);
+
+            db.Tables[Tables[1].Name].OnSchema(null).AddForeignKeyTo(Tables[0].Name, null, schemaName)
+                                     .Through(Tables[1].Columns[1], Tables[0].Columns[0]);
 
             table.WithNotNullableColumn(Tables[0].Columns[1], DbType.String).OfSize(10).HavingDefault(FirstDefaultValue);
 
@@ -43,8 +50,10 @@ namespace MigSharp.NUnit.Integration
                     {
                         { 1, SecondDefaultValue },
                         { 2, SecondDefaultValue },
-                    }
-                };
+                    },
+                    new ExpectedTable("Orher", "Id", "Mig19Id")
+                }
+            ;
         } }
     }
 }

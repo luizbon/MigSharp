@@ -83,6 +83,7 @@ namespace MigSharp.Core.Entities
 
         internal ExistingTable(AlterTableCommand command)
         {
+            command.SchemaName = Schema;
             _command = command;
             _columns = new ColumnCollection(command);
             _indexes = new IndexesCollection(command);
@@ -92,12 +93,12 @@ namespace MigSharp.Core.Entities
 
         void IExistingTable.Rename(string newName)
         {
-            _command.Add(new RenameCommand(_command, newName));
+            _command.Add(new RenameCommand(_command, newName) {SchemaName = Schema});
         }
 
         void IExistingTable.Drop()
         {
-            _command.Add(new DropCommand(_command));
+            _command.Add(new DropCommand(_command) {SchemaName = Schema});
         }
 
         public IAddedPrimaryKey AddPrimaryKey(string constraintName)
@@ -114,9 +115,9 @@ namespace MigSharp.Core.Entities
             return new AddedIndex(command);
         }
 
-        IAddedForeignKey IExistingTable.AddForeignKeyTo(string referencedTableName, string constraintName)
+        IAddedForeignKey IExistingTable.AddForeignKeyTo(string referencedTableName, string constraintName, string schemaName)
         {
-            var command = new AddForeignKeyToCommand(_command, referencedTableName, constraintName);
+            var command = new AddForeignKeyToCommand(_command, referencedTableName, constraintName) { SchemaName = schemaName };
             _command.Add(command);
             return new AddedForeignKey(command);
         }
@@ -127,6 +128,8 @@ namespace MigSharp.Core.Entities
             _command.Add(command);
             return new AddedUniqueConstraint(command);
         }
+
+        public string Schema { get; set; }
 
         IExistingTableWithAddedColumn IExistingTableBase.AddNotNullableColumn(string name, DbType type)
         {

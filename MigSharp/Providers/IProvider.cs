@@ -87,7 +87,7 @@ namespace MigSharp.Providers
         /// Adds a foreign key constraint to a table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName);
+        IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null);
 
         /// <summary>
         /// Drops a foreign key constraint from a table.

@@ -199,12 +199,13 @@ namespace MigSharp.Providers
 
         public abstract IEnumerable<string> DropIndex(string tableName, string indexName);
 
-        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName)
+        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null)
         {
-            yield return AlterTable(tableName) + string.Format(CultureInfo.InvariantCulture, "  ADD  CONSTRAINT [{0}] FOREIGN KEY({1}){2}REFERENCES {3} ({4})",
+            yield return AlterTable(tableName) + string.Format(CultureInfo.InvariantCulture, "  ADD  CONSTRAINT [{0}] FOREIGN KEY({1}){2}REFERENCES {3}.{4} ({5})",
                 constraintName,
                 string.Join(", ", columnNames.Select(n => Escape(n.ColumnName)).ToArray()),
                 Environment.NewLine,
+                Escape(schemaName ?? "dbo"),
                 Escape(referencedTableName),
                 string.Join(", ", columnNames.Select(n => Escape(n.ReferencedColumnName)).ToArray()));
         }

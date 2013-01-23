@@ -20,5 +20,6 @@ namespace MigSharp.Core.Commands
         }
 
         public IEnumerable<ICommand> Children { get { return _children; } }
+        public string SchemaName { get; set; }
     }
 }

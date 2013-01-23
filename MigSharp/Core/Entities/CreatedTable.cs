@@ -84,7 +84,8 @@ namespace MigSharp.Core.Entities
         }
 
         public string Schema { get { return _command.SchemaName; } }
-        public ICreatedTableBase OnSchema(string schemaName)
+
+        public ICreatedTable OnSchema(string schemaName)
         {
             _command.SchemaName = schemaName;
             return this;

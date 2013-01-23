@@ -245,7 +245,7 @@ namespace MigSharp.SqlServer.NUnit
             return ScriptChanges(table.Parent.Parent);
         }
 
-        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName)
+        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null)
         {
             Table table = GetTable(tableName);
             ForeignKey foreignKey = new ForeignKey(table, constraintName) { ReferencedTable = referencedTableName };

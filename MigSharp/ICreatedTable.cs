@@ -8,5 +8,6 @@ namespace MigSharp
     [SuppressMessage("Microsoft.Design", "CA1040:AvoidEmptyInterfaces", Justification = "Only temporary. Methods will be added to this interface eventually.")]
     public interface ICreatedTable : ICreatedTableBase
     {
+        ICreatedTable OnSchema(string schemaName);
     }
 }
