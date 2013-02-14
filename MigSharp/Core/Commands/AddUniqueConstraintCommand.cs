@@ -31,7 +31,7 @@ namespace MigSharp.Core.Commands
                 throw new InvalidCommandException("At least one column must be added to the AddUniqueConstraint command.");
             }
             string effectiveConstraintName = GetEffectiveConstraintName();
-            return provider.AddUniqueConstraint(Parent.TableName, _columnNames, effectiveConstraintName);
+            return provider.AddUniqueConstraint(Parent.TableName, _columnNames, effectiveConstraintName, SchemaName);
         }
 
         private string GetEffectiveConstraintName()

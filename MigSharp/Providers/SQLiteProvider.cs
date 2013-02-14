@@ -45,7 +45,7 @@ namespace MigSharp.Providers
             return SqlScriptingHelper.ToSql(value, targetDbType);
         }
 
-        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName)
+        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, @"CREATE TABLE ""{0}"" ({1}{2}{1})",
                 tableName,
@@ -117,40 +117,40 @@ namespace MigSharp.Providers
             return Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
-        public IEnumerable<string> DropTable(string tableName)
+        public IEnumerable<string> DropTable(string tableName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, @"DROP TABLE ""{0}""", tableName);
         }
 
-        public IEnumerable<string> AddColumn(string tableName, Column column)
+        public IEnumerable<string> AddColumn(string tableName, Column column, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, @"ALTER TABLE ""{0}"" ADD COLUMN {1}", tableName, GetColumnDefinition(column));
         }
 
-        public IEnumerable<string> RenameTable(string oldName, string newName)
+        public IEnumerable<string> RenameTable(string oldName, string newName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, @"ALTER TABLE ""{0}"" RENAME TO ""{1}""", oldName, newName);
         }
 
-        public IEnumerable<string> RenameColumn(string tableName, string oldName, string newName)
+        public IEnumerable<string> RenameColumn(string tableName, string oldName, string newName, string schemaName)
         {
             // http://stackoverflow.com/questions/805363/how-do-i-rename-a-column-in-a-sqlite-database-table
             throw new NotSupportedException("Rename the table, create a new table with the correct columns, and copy the contents from the renamed table.");
         }
 
-        public IEnumerable<string> DropColumn(string tableName, string columnName)
+        public IEnumerable<string> DropColumn(string tableName, string columnName, string schemaName)
         {
             // http://stackoverflow.com/questions/805363/how-do-i-rename-a-column-in-a-sqlite-database-table
             throw new NotSupportedException("Rename the table, create a new table with the correct columns, and copy the contents from the renamed table.");
         }
 
-        public IEnumerable<string> AlterColumn(string tableName, Column column)
+        public IEnumerable<string> AlterColumn(string tableName, Column column, string schemaName)
         {
             // http://www.sqlite.org/omitted.html
             throw new NotSupportedException("Rename the table, create a new table with the correct columns, and copy the contents from the renamed table.");
         }
 
-        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName)
+        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName, string schemaName)
         {
             yield return AddIndex(tableName, columnNames, indexName, false);
         }
@@ -164,12 +164,12 @@ namespace MigSharp.Providers
                 string.Join(", ", columnNames.ToArray()));
         }
 
-        public IEnumerable<string> DropIndex(string tableName, string indexName)
+        public IEnumerable<string> DropIndex(string tableName, string indexName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, @"DROP INDEX ""{0}""", indexName);
         }
 
-        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null)
+        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName, string referencedSchemaName)
         {
             // Do nothing. SQLite only supports foreign keys under special circumstances (see: http://www.sqlite.org/foreignkeys.html).
             // We do not throw a NotSupportedException since not having foreign keys does not change anything about how the database is used.
@@ -177,39 +177,39 @@ namespace MigSharp.Providers
             return Enumerable.Empty<string>();
         }
 
-        public IEnumerable<string> DropForeignKey(string tableName, string constraintName)
+        public IEnumerable<string> DropForeignKey(string tableName, string constraintName, string schemaName)
         {
             return Enumerable.Empty<string>(); // see comments in AddForeignKey
         }
 
-        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
             // http://stackoverflow.com/questions/946011/sqlite-add-primary-key
             throw new NotSupportedException("Primary keys cannot be added/removed/renamed retrospectively. If you need a different primary key, you need to recreate the table with the right primary key and copy the contents from the old table.");
         }
 
-        public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName)
+        public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName, string schemaName)
         {
             throw new NotSupportedException("Primary keys cannot be added/removed/renamed retrospectively. If you need a different primary key, you need to recreate the table with the right primary key and copy the contents from the old table.");
         }
 
-        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName)
+        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName, string schemaName)
         {
             // http://stackoverflow.com/questions/849269/sqlite-how-to-remove-an-unamed-primary-key
             throw new NotSupportedException("Primary keys cannot be added/removed/renamed retrospectively. If you need a different primary key, you need to recreate the table with the right primary key and copy the contents from the old table.");
         }
 
-        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
             yield return AddIndex(tableName, columnNames, constraintName, true);
         }
 
-        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName)
+        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName, string schemaName)
         {
-            return DropIndex(tableName, constraintName);
+            return DropIndex(tableName, constraintName, schemaName);
         }
 
-        public IEnumerable<string> DropDefault(string tableName, Column column)
+        public IEnumerable<string> DropDefault(string tableName, Column column, string schemaName)
         {
             // http://www.sqlite.org/omitted.html
             throw new NotSupportedException("Rename the table, create a new table with the correct columns, and copy the contents from the renamed table.");

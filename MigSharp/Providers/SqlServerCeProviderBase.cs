@@ -30,14 +30,13 @@ namespace MigSharp.Providers
     internal class SqlServerCeProviderBase : SqlServerProviderBase
     {
         public override bool SpecifyWith { get { return false; } }
-        public override string SchemaName { get { return string.Empty; } set { throw new NotSupportedException(); } }
 
         public override string ExistsTable(string databaseName, string tableName)
         {
             return string.Format(CultureInfo.InvariantCulture, @"SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{0}'", tableName);
         }
 
-        protected override IEnumerable<string> DropDefaultConstraint(string tableName, string columnName, bool checkIfExists)
+        protected override IEnumerable<string> DropDefaultConstraint(string tableName, string columnName, bool checkIfExists, string schemaName)
         {
             // checkIfExists can be ignored
             yield return string.Format(CultureInfo.InvariantCulture, @"ALTER TABLE {0} ALTER COLUMN {1} DROP DEFAULT",
@@ -45,22 +44,22 @@ namespace MigSharp.Providers
                 Escape(columnName));
         }
 
-        public override IEnumerable<string> RenameTable(string oldName, string newName)
+        public override IEnumerable<string> RenameTable(string oldName, string newName, string schemaName)
         {
             yield return string.Format("EXEC sp_rename @objname = N'{0}', @newname = N'{1}'", oldName, newName);
         }
 
-        public override IEnumerable<string> RenameColumn(string tableName, string oldName, string newName)
+        public override IEnumerable<string> RenameColumn(string tableName, string oldName, string newName, string schemaName)
         {
             throw new NotSupportedException("Consider adding a column with the new name, then UPDATEing it with the values from the old one, then dropping the old column. Or if the order of the columns matters, consider creating a new table with the desired schema, then INSERTing the content from the old table to the new one, then renaming the new table to the old name.");
         }
 
-        public override IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName)
+        public override IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName, string schemaName)
         {
             throw new NotSupportedException("Drop and add the primary key with the new name instead.");
         }
 
-        public override IEnumerable<string> DropIndex(string tableName, string indexName)
+        public override IEnumerable<string> DropIndex(string tableName, string indexName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, "DROP INDEX {1}.{0}", Escape(indexName), Escape(tableName));
         }

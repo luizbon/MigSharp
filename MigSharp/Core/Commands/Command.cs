@@ -11,7 +11,10 @@ namespace MigSharp.Core.Commands
 
         protected Command(ICommand parent)
         {
+            SchemaName = "dbo";
             _parent = parent;
+            if(parent != null)
+                SchemaName = parent.SchemaName;
         }
 
         public void Add(ICommand child)

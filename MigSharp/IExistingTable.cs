@@ -59,7 +59,7 @@ namespace MigSharp
         /// <param name="referencedTableName">The name of the referenced table.</param>
         /// <param name="constraintName">Optionally, the name of the foreign key constraint. If null or empty, a default name will be generated.</param>
         /// <param name="schemaName">Optionally, the referenced table schema name</param>
-        IAddedForeignKey AddForeignKeyTo(string referencedTableName, string constraintName, string schemaName = null);
+        IAddedForeignKey AddForeignKeyTo(string referencedTableName, string constraintName, string schemaName = "dbo");
 
         /// <summary>
         /// Adds an unique constraint to the table.
@@ -106,7 +106,7 @@ namespace MigSharp
         /// <param name="referencedTableName">The name of the referenced table.</param>
         public static IAddedForeignKey AddForeignKeyTo(this IExistingTable table, string referencedTableName)
         {
-            return table.AddForeignKeyTo(referencedTableName, null, null);
+            return table.AddForeignKeyTo(referencedTableName, null);
         }
 
         /// <summary>

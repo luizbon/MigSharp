@@ -31,105 +31,105 @@ namespace MigSharp.Providers
         /// <param name="tableName">The name of the new table.</param>
         /// <param name="columns">The columns of the new table.</param>
         /// <param name="primaryKeyConstraintName">Empty if there are no primary key columns.</param>
-        /// <param name="schemaName">The schema of the new table</param>
+        /// <param name="schemaName"></param>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName);
+        IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName, string schemaName);
 
         /// <summary>
         /// Drops a table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> DropTable(string tableName);
+        IEnumerable<string> DropTable(string tableName, string schemaName);
 
         /// <summary>
         /// Adds columns to an existing table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> AddColumn(string tableName, Column column);
+        IEnumerable<string> AddColumn(string tableName, Column column, string schemaName);
 
         /// <summary>
         /// Renames an existing table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> RenameTable(string oldName, string newName);
+        IEnumerable<string> RenameTable(string oldName, string newName, string schemaName);
 
         /// <summary>
         /// Renames a column of an existing table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> RenameColumn(string tableName, string oldName, string newName);
+        IEnumerable<string> RenameColumn(string tableName, string oldName, string newName, string schemaName);
 
         /// <summary>
         /// Removes a column from an existing table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> DropColumn(string tableName, string columnName);
+        IEnumerable<string> DropColumn(string tableName, string columnName, string schemaName);
 
         /// <summary>
         /// Changes the data type of a column.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> AlterColumn(string tableName, Column column);
+        IEnumerable<string> AlterColumn(string tableName, Column column, string schemaName);
 
         /// <summary>
         /// Adds an index to a table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName);
+        IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName, string schemaName);
 
         /// <summary>
         /// Drops an index from a table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> DropIndex(string tableName, string indexName);
+        IEnumerable<string> DropIndex(string tableName, string indexName, string schemaName);
 
         /// <summary>
         /// Adds a foreign key constraint to a table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null);
+        IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName, string referencedSchemaName);
 
         /// <summary>
         /// Drops a foreign key constraint from a table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> DropForeignKey(string tableName, string constraintName);
+        IEnumerable<string> DropForeignKey(string tableName, string constraintName, string schemaName);
 
         /// <summary>
         /// Adds a primary key constraint to a table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName);
+        IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName);
 
         /// <summary>
         /// Renames the primary key.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName);
+        IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName, string schemaName);
 
         /// <summary>
         /// Drops a primary key constraint from a table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> DropPrimaryKey(string tableName, string constraintName);
+        IEnumerable<string> DropPrimaryKey(string tableName, string constraintName, string schemaName);
 
         /// <summary>
         /// Adds an unique constraint to a table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName);
+        IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName);
 
         /// <summary>
         /// Drops a unique constraint from a table.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName);
+        IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName, string schemaName);
 
         /// <summary>
         /// Drops the default value (constraint) from a column.
         /// </summary>
         /// <returns>The SQL commands to be executed.</returns>
-        IEnumerable<string> DropDefault(string tableName, Column column);
+        IEnumerable<string> DropDefault(string tableName, Column column, string schemaName);
 
         /// <summary>
         /// Return escaped name
@@ -137,8 +137,6 @@ namespace MigSharp.Providers
         /// <param name="name">value to escape</param>
         /// <returns></returns>
         string Escape(string name);
-
-        string SchemaName { get; set; }
     }
 
     internal static class ProviderExtensions

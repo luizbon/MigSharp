@@ -29,7 +29,7 @@ namespace MigSharp.Core.Commands
                 Parent.ColumnName, 
                 new DataType(_type, Size, Scale), 
                 _isNullable,
-                DefaultValue));
+                DefaultValue), SchemaName);
         }
     }
 }

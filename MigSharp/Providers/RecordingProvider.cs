@@ -44,7 +44,7 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName)
+        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName, string schemaName)
         {
             AddMethodName();
             AddNewObjectNames(tableName, primaryKeyConstraintName);
@@ -58,14 +58,14 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> DropTable(string tableName)
+        public IEnumerable<string> DropTable(string tableName, string schemaName)
         {
             AddMethodName();
             return Enumerable.Empty<string>();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> AddColumn(string tableName, Column column)
+        public IEnumerable<string> AddColumn(string tableName, Column column, string schemaName)
         {
             AddMethodName();
             AddNewObjectNames(column.Name);
@@ -74,7 +74,7 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> RenameTable(string oldName, string newName)
+        public IEnumerable<string> RenameTable(string oldName, string newName, string schemaName)
         {
             AddMethodName();
             AddNewObjectNames(newName);
@@ -82,7 +82,7 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> RenameColumn(string tableName, string oldName, string newName)
+        public IEnumerable<string> RenameColumn(string tableName, string oldName, string newName, string schemaName)
         {
             AddMethodName();
             AddNewObjectNames(newName);
@@ -90,14 +90,14 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> DropColumn(string tableName, string columnName)
+        public IEnumerable<string> DropColumn(string tableName, string columnName, string schemaName)
         {
             AddMethodName();
             return Enumerable.Empty<string>();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> AlterColumn(string tableName, Column column)
+        public IEnumerable<string> AlterColumn(string tableName, Column column, string schemaName)
         {
             AddMethodName();
             _dataTypes.Add(new UsedDataType(column.DataType, false, false));
@@ -105,7 +105,7 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName)
+        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName, string schemaName)
         {
             AddMethodName();
             AddNewObjectNames(indexName);
@@ -113,14 +113,14 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> DropIndex(string tableName, string indexName)
+        public IEnumerable<string> DropIndex(string tableName, string indexName, string schemaName)
         {
             AddMethodName();
             return Enumerable.Empty<string>();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null)
+        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName, string referencedSchemaName)
         {
             AddMethodName();
             AddNewObjectNames(constraintName);
@@ -128,14 +128,14 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> DropForeignKey(string tableName, string constraintName)
+        public IEnumerable<string> DropForeignKey(string tableName, string constraintName, string schemaName)
         {
             AddMethodName();
             return Enumerable.Empty<string>();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
             AddMethodName();
             AddNewObjectNames(constraintName);
@@ -145,7 +145,7 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName)
+        public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName, string schemaName)
         {
             AddMethodName();
             AddNewObjectNames(newName);
@@ -153,14 +153,14 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName)
+        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName, string schemaName)
         {
             AddMethodName();
             return Enumerable.Empty<string>();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
             AddMethodName();
             AddNewObjectNames(constraintName);
@@ -168,14 +168,14 @@ namespace MigSharp.Providers
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName)
+        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName, string schemaName)
         {
             AddMethodName();
             return Enumerable.Empty<string>();
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public IEnumerable<string> DropDefault(string tableName, Column column)
+        public IEnumerable<string> DropDefault(string tableName, Column column, string schemaName)
         {
             AddMethodName();
             return Enumerable.Empty<string>();
@@ -185,8 +185,6 @@ namespace MigSharp.Providers
         {
             return string.Format(CultureInfo.InvariantCulture, "\"{0}\"", name);
         }
-
-        public string SchemaName { get; set; }
 
         #endregion
 

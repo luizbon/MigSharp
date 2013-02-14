@@ -47,7 +47,7 @@ namespace MigSharp.Providers
             return SqlScriptingHelper.ToSql(value, targetDbType);
         }
 
-        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName)
+        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName, string schemaName)
         {
             string commandText = string.Empty;
             var primaryKeyColumns = new List<string>();
@@ -111,12 +111,12 @@ namespace MigSharp.Providers
             yield return commandText;
         }
 
-        public IEnumerable<string> DropTable(string tableName)
+        public IEnumerable<string> DropTable(string tableName, string schemaName)
         {
             yield return string.Format("DROP TABLE {0}", Escape(tableName));
         }
 
-        public IEnumerable<string> AddColumn(string tableName, Column column)
+        public IEnumerable<string> AddColumn(string tableName, Column column, string schemaName)
         {
             // assemble ALTER TABLE statements
             string commandText = string.Format(@"{0} ADD ", AlterTable(tableName));
@@ -124,22 +124,22 @@ namespace MigSharp.Providers
             yield return commandText;
         }
 
-        public IEnumerable<string> RenameTable(string oldName, string newName)
+        public IEnumerable<string> RenameTable(string oldName, string newName, string schemaName)
         {
             yield return string.Format("RENAME TABLE {0} TO {1};", Escape(oldName), Escape(newName));
         }
 
-        public IEnumerable<string> RenameColumn(string tableName, string oldName, string newName)
+        public IEnumerable<string> RenameColumn(string tableName, string oldName, string newName, string schemaName)
         {
             yield return string.Format("{0} RENAME {1} TO {2}", AlterTable(tableName), Escape(oldName), Escape(newName));
         }
 
-        public IEnumerable<string> DropColumn(string tableName, string columnName)
+        public IEnumerable<string> DropColumn(string tableName, string columnName, string schemaName)
         {
             yield return string.Format(string.Format("{0} DROP {1}", AlterTable(tableName), Escape(columnName)));
         }
-
-        public IEnumerable<string> AlterColumn(string tableName, Column column)
+        
+        public IEnumerable<string> AlterColumn(string tableName, Column column, string schemaName)
         {
             yield return string.Format(string.Format("{0} ADD {1}", AlterTable(tableName), GetColumnString(column, false)));
         }
@@ -149,17 +149,17 @@ namespace MigSharp.Providers
             yield return string.Format("{0} DROP CONSTRAINT {1}", AlterTable(tableName), Escape(constraintName));
         }
 
-        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName)
+        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, "CREATE INDEX {0} ({1}) ON {2}", Escape(indexName), GetCsList(columnNames), Escape(tableName));
         }
 
-        public IEnumerable<string> DropIndex(string tableName, string indexName)
+        public IEnumerable<string> DropIndex(string tableName, string indexName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, "DROP INDEX {0} ON {1}", Escape(indexName), Escape(tableName));
         }
 
-        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null)
+        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName, string referencedSchemaName)
         {
             string sourceCols = String.Empty;
             string targetCols = String.Empty;
@@ -175,29 +175,29 @@ namespace MigSharp.Providers
             yield return string.Format("{0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES WITH CHECK OPTION {3}({4})", AlterTable(tableName), Escape(constraintName), sourceCols, referencedTableName, targetCols);
         }
 
-        public IEnumerable<string> DropForeignKey(string tableName, string constraintName)
+        public IEnumerable<string> DropForeignKey(string tableName, string constraintName, string schemaName)
         {
             return DropConstraint(tableName, constraintName);
         }
 
-        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
             throw new NotSupportedException("Teradata always automatically generates a 'Primary Index' when creating a table which cannot be removed retrospectively. If you need a different primary key, you need to recreate the table with the right primary key and copy the contents from the old table.");
             //yield return string.Format("{0} ADD CONSTRAINT {1} PRIMARY KEY ({2})", AlterTable(tableName), Escape(constraintName), GetCsList(columnNames));
         }
 
-        public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName)
+        public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName, string schemaName)
         {
             throw new NotSupportedException("Teradata always automatically generates a 'Primary Index' when creating a table which cannot be removed retrospectively. If you need a different primary key, you need to recreate the table with the right primary key and copy the contents from the old table.");
         }
 
-        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName)
+        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName, string schemaName)
         {
             throw new NotSupportedException("Teradata always automatically generates a 'Primary Index' when creating a table which cannot be removed retrospectively. If you need a different primary key, you need to recreate the table with the right primary key and copy the contents from the old table.");
             //return DropConstraint(tableName, constraintName);
         }
 
-        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
             string columns = columnNames.Aggregate(String.Empty, (current, column) => current + (Escape(column) + ","));
             columns = columns.TrimEnd(',');
@@ -205,15 +205,15 @@ namespace MigSharp.Providers
             yield return string.Format("CREATE UNIQUE INDEX {0} ({1}) ON {2}", Escape(constraintName), columns, tableName);
         }
 
-        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName)
+        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName, string schemaName)
         {
             yield return string.Format("DROP UNIQUE INDEX {0} ON {1}", Escape(constraintName), tableName);
         }
 
-        public IEnumerable<string> DropDefault(string tableName, Column column)
+        public IEnumerable<string> DropDefault(string tableName, Column column, string schemaName)
         {
             Debug.Assert(column.DefaultValue == null, "The DefaultValue must be null as we are going to call AlterColumn with it.");
-            return AlterColumn(tableName, column);
+            return AlterColumn(tableName, column, schemaName);
         }
 
         private string CreateTable(string tableName)

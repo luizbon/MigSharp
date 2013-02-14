@@ -43,7 +43,7 @@ namespace MigSharp.Providers
             return SqlScriptingHelper.ToSql(value, targetDbType);
         }
 
-        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName)
+        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName, string schemaName)
         {
             string commandText = string.Empty;
             string identityColumn = string.Empty;
@@ -143,7 +143,7 @@ namespace MigSharp.Providers
             return ObjectNameHelper.GetObjectName(tableName, "SEQ", MaximumDbObjectNameLength, tableName.GetHashCode().ToString(CultureInfo.InvariantCulture));
         }
 
-        public IEnumerable<string> DropTable(string tableName)
+        public IEnumerable<string> DropTable(string tableName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, @"DROP TABLE {0}", Escape(tableName));
 
@@ -195,7 +195,7 @@ namespace MigSharp.Providers
             return Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
-        public IEnumerable<string> AddColumn(string tableName, Column column)
+        public IEnumerable<string> AddColumn(string tableName, Column column, string schemaName)
         {
             // assemble ALTER TABLE statements
             string commandText = string.Format(CultureInfo.InvariantCulture, @"{0} ADD ", AlterTable(tableName));
@@ -203,7 +203,7 @@ namespace MigSharp.Providers
             yield return commandText;
         }
 
-        public IEnumerable<string> RenameTable(string oldName, string newName)
+        public IEnumerable<string> RenameTable(string oldName, string newName, string schemaName)
         {
             // rename table
             yield return string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0} RENAME TO {1}", Escape(oldName), Escape(newName));
@@ -246,17 +246,17 @@ namespace MigSharp.Providers
                 ).Replace(Environment.NewLine, " ");
         }
 
-        public IEnumerable<string> RenameColumn(string tableName, string oldName, string newName)
+        public IEnumerable<string> RenameColumn(string tableName, string oldName, string newName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0} RENAME COLUMN {1} TO {2}", Escape(tableName), Escape(oldName), Escape(newName));
         }
 
-        public IEnumerable<string> DropColumn(string tableName, string columnName)
+        public IEnumerable<string> DropColumn(string tableName, string columnName, string schemaName)
         {
             yield return string.Format(string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0} DROP COLUMN {1}", Escape(tableName), Escape(columnName)));
         }
-
-        public IEnumerable<string> AlterColumn(string tableName, Column column)
+        
+        public IEnumerable<string> AlterColumn(string tableName, Column column, string schemaName)
         {
             string query = @"declare 
                              l_nullable varchar2(1);
@@ -301,17 +301,17 @@ namespace MigSharp.Providers
             yield return string.Format(CultureInfo.InvariantCulture, "{0} DROP CONSTRAINT {1}", AlterTable(tableName), Escape(constraintName));
         }
 
-        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName)
+        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, "CREATE INDEX {0} ON {1} ({2})", Escape(indexName), Escape(tableName), GetCsList(columnNames));
         }
 
-        public IEnumerable<string> DropIndex(string tableName, string indexName)
+        public IEnumerable<string> DropIndex(string tableName, string indexName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, "DROP INDEX {0}", Escape(indexName));
         }
 
-        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null)
+        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName, string referencedSchemaName)
         {
             string sourceCols = String.Empty;
             string targetCols = String.Empty;
@@ -327,17 +327,17 @@ namespace MigSharp.Providers
             yield return string.Format(CultureInfo.InvariantCulture, "{0} ADD CONSTRAINT {1} FOREIGN KEY ({2}) REFERENCES {3}({4})", AlterTable(tableName), Escape(constraintName), sourceCols, Escape(referencedTableName), targetCols);
         }
 
-        public IEnumerable<string> DropForeignKey(string tableName, string constraintName)
+        public IEnumerable<string> DropForeignKey(string tableName, string constraintName, string schemaName)
         {
             return DropConstraint(tableName, constraintName);
         }
 
-        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, "{0} ADD CONSTRAINT {1} PRIMARY KEY ({2})", AlterTable(tableName), Escape(constraintName), GetCsList(columnNames));
         }
 
-        public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName)
+        public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, "{0} RENAME CONSTRAINT {1} TO {2}", AlterTable(tableName), Escape(oldName), Escape(newName));
             yield return string.Format(CultureInfo.InvariantCulture, "{0} RENAME TO {1}", AlterIndex(oldName), Escape(newName));
@@ -348,25 +348,25 @@ namespace MigSharp.Providers
             return string.Format(CultureInfo.InvariantCulture, "ALTER INDEX {0}", Escape(indexName));
         }
 
-        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName)
+        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName, string schemaName)
         {
             return DropConstraint(tableName, constraintName);
         }
 
-        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
             yield return string.Format(CultureInfo.InvariantCulture, "{0} ADD CONSTRAINT {1} UNIQUE ({2})", AlterTable(tableName), Escape(constraintName), GetCsList(columnNames));
         }
 
-        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName)
+        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName, string schemaName)
         {
             return DropConstraint(tableName, constraintName);
         }
 
-        public IEnumerable<string> DropDefault(string tableName, Column column)
+        public IEnumerable<string> DropDefault(string tableName, Column column, string schemaName)
         {
             Debug.Assert(column.DefaultValue == null, "The DefaultValue must be null as we are going to call AlterColumn with it.");
-            return AlterColumn(tableName, column);
+            return AlterColumn(tableName, column, schemaName);
         }
 
         private string CreateTable(string tableName)

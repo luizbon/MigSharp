@@ -29,7 +29,7 @@ namespace MigSharp.Core.Commands
                 throw new InvalidCommandException("At least one column must be added to the AddIndex command.");
             }
             string effectiveIndexName = GetEffectiveIndexName();
-            return provider.AddIndex(Parent.TableName, _columnNames, effectiveIndexName);
+            return provider.AddIndex(Parent.TableName, _columnNames, effectiveIndexName, SchemaName);
         }
 
         private string GetEffectiveIndexName()

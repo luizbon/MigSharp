@@ -32,7 +32,7 @@ namespace MigSharp.SqlServer.NUnit
             throw new NotSupportedException();
         }
 
-        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName)
+        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName, string schemaName)
         {
             Table table = GetTable(tableName);
             foreach (CreatedColumn createdColumn in columns)
@@ -77,14 +77,14 @@ namespace MigSharp.SqlServer.NUnit
             return TransformScript(table.Script(options));
         }
 
-        public IEnumerable<string> DropTable(string tableName)
+        public IEnumerable<string> DropTable(string tableName, string schemaName)
         {
             Table table = GetTable(tableName);
             table.Drop();
             return ScriptChanges(table.Parent.Parent);
         }
 
-        public IEnumerable<string> AddColumn(string tableName, Column column)
+        public IEnumerable<string> AddColumn(string tableName, Column column, string schemaName)
         {
             Table table = GetTable(tableName);
             var c = new Microsoft.SqlServer.Management.Smo.Column(table, column.Name)
@@ -132,14 +132,14 @@ namespace MigSharp.SqlServer.NUnit
             return System.Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
-        public IEnumerable<string> RenameTable(string oldName, string newName)
+        public IEnumerable<string> RenameTable(string oldName, string newName, string schemaName)
         {
             Table table = GetTable(oldName);
             table.Rename(newName);
             return ScriptChanges(table.Parent.Parent);
         }
 
-        public IEnumerable<string> RenameColumn(string tableName, string oldName, string newName)
+        public IEnumerable<string> RenameColumn(string tableName, string oldName, string newName, string schemaName)
         {
             Table table = GetTable(tableName);
             var column = new Microsoft.SqlServer.Management.Smo.Column(table, oldName);
@@ -164,7 +164,7 @@ namespace MigSharp.SqlServer.NUnit
             }
         }
 
-        public IEnumerable<string> DropColumn(string tableName, string columnName)
+        public IEnumerable<string> DropColumn(string tableName, string columnName, string schemaName)
         {
             Table table = GetTable(tableName);
             string defaultConstraintName = ObjectNameHelper.GetObjectName(tableName, "DF", MaximumDbObjectNameLength, columnName);
@@ -184,7 +184,7 @@ namespace MigSharp.SqlServer.NUnit
             }
         }
 
-        public IEnumerable<string> AlterColumn(string tableName, Column column)
+        public IEnumerable<string> AlterColumn(string tableName, Column column, string schemaName)
         {
             // drop (possibly) existing default constraint
             Table table = GetTable(tableName);
@@ -218,7 +218,7 @@ namespace MigSharp.SqlServer.NUnit
             }
         }
 
-        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName)
+        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName, string schemaName)
         {
             Table table = GetTable(tableName);
             Index index = new Index(table, indexName);
@@ -237,7 +237,7 @@ namespace MigSharp.SqlServer.NUnit
             return ScriptChanges(table.Parent.Parent);
         }
 
-        public IEnumerable<string> DropIndex(string tableName, string indexName)
+        public IEnumerable<string> DropIndex(string tableName, string indexName, string schemaName)
         {
             Table table = GetTable(tableName);
             Index index = new Index(table, indexName);
@@ -245,7 +245,7 @@ namespace MigSharp.SqlServer.NUnit
             return ScriptChanges(table.Parent.Parent);
         }
 
-        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null)
+        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName, string referencedSchemaName)
         {
             Table table = GetTable(tableName);
             ForeignKey foreignKey = new ForeignKey(table, constraintName) { ReferencedTable = referencedTableName };
@@ -260,7 +260,7 @@ namespace MigSharp.SqlServer.NUnit
             return ScriptChanges(table.Parent.Parent);
         }
 
-        public IEnumerable<string> DropForeignKey(string tableName, string constraintName)
+        public IEnumerable<string> DropForeignKey(string tableName, string constraintName, string schemaName)
         {
             Table table = GetTable(tableName);
             ForeignKey foreignKey = new ForeignKey(table, constraintName);
@@ -268,12 +268,12 @@ namespace MigSharp.SqlServer.NUnit
             return ScriptChanges(table.Parent.Parent);
         }
 
-        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
             return AddConstraint(tableName, constraintName, IndexKeyType.DriPrimaryKey, columnNames);
         }
 
-        public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName)
+        public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName, string schemaName)
         {
             Table table = GetTable(tableName);
             Index primaryKey = new Index(table, oldName) { IndexKeyType = IndexKeyType.DriPrimaryKey };
@@ -281,12 +281,12 @@ namespace MigSharp.SqlServer.NUnit
             return ScriptChanges(table.Parent.Parent);
         }
 
-        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName)
+        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName, string schemaName)
         {
             return DropConstraint(tableName, constraintName, IndexKeyType.DriPrimaryKey);
         }
 
-        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
             return AddConstraint(tableName, constraintName, IndexKeyType.DriUniqueKey, columnNames);
         }
@@ -306,12 +306,12 @@ namespace MigSharp.SqlServer.NUnit
             return ScriptChanges(table.Parent.Parent);
         }
 
-        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName)
+        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName, string schemaName)
         {
             return DropConstraint(tableName, constraintName, IndexKeyType.DriUniqueKey);
         }
 
-        public IEnumerable<string> DropDefault(string tableName, Column column)
+        public IEnumerable<string> DropDefault(string tableName, Column column, string schemaName)
         {
             Table table = GetTable(tableName);
             var c = new Microsoft.SqlServer.Management.Smo.Column(table, column.Name)

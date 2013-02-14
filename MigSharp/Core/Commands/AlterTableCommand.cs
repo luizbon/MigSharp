@@ -6,7 +6,7 @@ namespace MigSharp.Core.Commands
 
         public string TableName { get { return _tableName; } }
 
-        public AlterTableCommand(ICommand parent, string tableName, string schemaName = null)
+        public AlterTableCommand(ICommand parent, string tableName, string schemaName = "dbo")
             : base(parent)
         {
             _tableName = tableName;

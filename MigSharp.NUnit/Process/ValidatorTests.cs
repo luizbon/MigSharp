@@ -260,87 +260,87 @@ namespace MigSharp.NUnit.Process
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName)
+            IEnumerable<string> IProvider.CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName, string schemaName)
             {
                 yield break;
             }
 
-            IEnumerable<string> IProvider.DropTable(string tableName)
+            IEnumerable<string> IProvider.DropTable(string tableName, string schemaName)
             {
                 throw new NotSupportedException(NotSupportedMessageForDropTable);
             }
 
-            IEnumerable<string> IProvider.AddColumn(string tableName, Column column)
+            IEnumerable<string> IProvider.AddColumn(string tableName, Column column, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.RenameTable(string oldName, string newName)
+            IEnumerable<string> IProvider.RenameTable(string oldName, string newName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.RenameColumn(string tableName, string oldName, string newName)
+            IEnumerable<string> IProvider.RenameColumn(string tableName, string oldName, string newName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.DropColumn(string tableName, string columnName)
+            IEnumerable<string> IProvider.DropColumn(string tableName, string columnName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.AlterColumn(string tableName, Column column)
+            IEnumerable<string> IProvider.AlterColumn(string tableName, Column column, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName)
+            public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            public IEnumerable<string> DropIndex(string tableName, string indexName)
+            public IEnumerable<string> DropIndex(string tableName, string indexName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName)
+            IEnumerable<string> IProvider.AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName, string referencedSchemaName)
             {
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.DropForeignKey(string tableName, string constraintName)
+            IEnumerable<string> IProvider.DropForeignKey(string tableName, string constraintName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName)
+            IEnumerable<string> IProvider.AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName)
+            public IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.DropPrimaryKey(string tableName, string constraintName)
+            IEnumerable<string> IProvider.DropPrimaryKey(string tableName, string constraintName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName)
+            IEnumerable<string> IProvider.AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            IEnumerable<string> IProvider.DropUniqueConstraint(string tableName, string constraintName)
+            IEnumerable<string> IProvider.DropUniqueConstraint(string tableName, string constraintName, string schemaName)
             {
                 throw new NotSupportedException();
             }
 
-            public IEnumerable<string> DropDefault(string tableName, Column column)
+            public IEnumerable<string> DropDefault(string tableName, Column column, string schemaName)
             {
                 throw new NotSupportedException();
             }
@@ -349,8 +349,6 @@ namespace MigSharp.NUnit.Process
             {
                 return string.Format("\"{0}\"", name);
             }
-
-            public string SchemaName { get; set; }
 
             #endregion
         }

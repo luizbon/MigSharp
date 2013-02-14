@@ -27,7 +27,7 @@ namespace MigSharp.NUnit.Providers
         public void VerifyMethodNamesAreRecorded()
         {
             var provider = new RecordingProvider();
-            provider.RenameColumn("Table", "OldColumn", "NewColumn").ToList();
+            provider.RenameColumn("Table", "OldColumn", "NewColumn", null).ToList();
             CollectionAssert.AreEquivalent(new[] { "RenameColumn" }, provider.Methods.ToList());
         }
 
@@ -35,7 +35,7 @@ namespace MigSharp.NUnit.Providers
         public void VerifyNewObjectNamesAreRecorded()
         {
             var provider = new RecordingProvider();
-            provider.CreateTable("Table", new[] { new CreatedColumn("Column", new DataType(DbType.Boolean, 0, 0), false, true, string.Empty, false, null) }, "MyPK").ToList();
+            provider.CreateTable("Table", new[] { new CreatedColumn("Column", new DataType(DbType.Boolean, 0, 0), false, true, string.Empty, false, null) }, "MyPK", null).ToList();
             CollectionAssert.AreEquivalent(new[] { "Table", "Column", "MyPK" }, provider.NewObjectNames.ToList());
         }
 
@@ -44,11 +44,11 @@ namespace MigSharp.NUnit.Providers
         {
             var provider = new RecordingProvider();
             provider.CreateTable("Table", new[]
-            {
-                new CreatedColumn("Primary Key Column", new DataType(DbType.Int32, 0, 0), false, true, string.Empty, false, null),
-                new CreatedColumn("Identity Column", new DataType(DbType.Int64, 0, 0), false, false, string.Empty, true, null),
-                new CreatedColumn("Column", new DataType(DbType.String, 0, 0), false, false, string.Empty, false, null),
-            }, "MyPK").ToList();
+                                              {
+                                                  new CreatedColumn("Primary Key Column", new DataType(DbType.Int32, 0, 0), false, true, string.Empty, false, null),
+                                                  new CreatedColumn("Identity Column", new DataType(DbType.Int64, 0, 0), false, false, string.Empty, true, null),
+                                                  new CreatedColumn("Column", new DataType(DbType.String, 0, 0), false, false, string.Empty, false, null),
+                                              }, "MyPK", null).ToList();
             CollectionAssert.AreEquivalent(new[]
             {
                 new UsedDataType(new DataType(DbType.Int32, 0, 0), true, false),

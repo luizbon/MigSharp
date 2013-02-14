@@ -28,7 +28,7 @@ namespace MigSharp.Core.Commands
                 throw new InvalidCommandException("At least one column must be added to the AddPrimaryKey command.");
             }
             string effectiveConstraintName = GetEffectiveConstraintName();
-            return provider.AddPrimaryKey(Parent.TableName, _columnNames, effectiveConstraintName);
+            return provider.AddPrimaryKey(Parent.TableName, _columnNames, effectiveConstraintName, SchemaName);
         }
 
         private string GetEffectiveConstraintName()

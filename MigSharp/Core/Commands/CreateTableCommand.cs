@@ -12,9 +12,7 @@ namespace MigSharp.Core.Commands
         private readonly string _primaryKeyConstraintName;
 
         public string TableName { get { return _tableName; } }
-
-        public string SchemaName { get; set; }
-
+        
         public CreateTableCommand(ICommand parent, string tableName, string primaryKeyConstraintName)
             : base(parent)
         {
@@ -30,7 +28,6 @@ namespace MigSharp.Core.Commands
             {
                 throw new InvalidCommandException("At least one column must be added to the CreateTable command.");
             }
-            provider.SchemaName = SchemaName;
             return provider.CreateTable(
                 _tableName,
                 createColumnCommands.Select(c => new CreatedColumn(
@@ -41,7 +38,7 @@ namespace MigSharp.Core.Commands
                                                      GetEffectiveUniqueConstraintName(c),
                                                      c.IsIdentity,
                                                      c.DefaultValue)),
-                effectivePkConstraintName);
+                effectivePkConstraintName, SchemaName);
         }
 
         private IEnumerable<CreateColumnCommand> GetCreateColumnCommands()

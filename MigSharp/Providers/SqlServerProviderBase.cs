@@ -14,7 +14,6 @@ namespace MigSharp.Providers
         private const string Identation = "\t";
 
         public abstract bool SpecifyWith { get; }
-        public abstract string SchemaName { get; set; }
 
         public abstract string ExistsTable(string databaseName, string tableName);
 
@@ -23,11 +22,11 @@ namespace MigSharp.Providers
             return SqlScriptingHelper.ToSql(value, targetDbType);
         }
         
-        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName)
+        public IEnumerable<string> CreateTable(string tableName, IEnumerable<CreatedColumn> columns, string primaryKeyConstraintName, string schemaName = "dbo")
         {
             string commandText = string.Empty;
             List<string> primaryKeyColumns = new List<string>();
-            commandText += string.Format(CultureInfo.InvariantCulture, @"{0}({1}", CreateTable(tableName), Environment.NewLine);
+            commandText += string.Format(CultureInfo.InvariantCulture, @"{0}({1}", CreateTable(tableName, schemaName), Environment.NewLine);
             bool columnDelimiterIsNeeded = false;
             foreach (CreatedColumn column in columns)
             {
@@ -98,15 +97,15 @@ namespace MigSharp.Providers
             yield return commandText;
         }
 
-        public IEnumerable<string> DropTable(string tableName)
+        public IEnumerable<string> DropTable(string tableName, string schemaName)
         {
-            yield return string.Format(CultureInfo.InvariantCulture, "DROP TABLE {0}.{1}", Escape(SchemaName), Escape(tableName));
+            yield return string.Format(CultureInfo.InvariantCulture, "DROP TABLE {0}.{1}", Escape(schemaName), Escape(tableName));
         }
-
-        public IEnumerable<string> AddColumn(string tableName, Column column)
+        
+        public IEnumerable<string> AddColumn(string tableName, Column column, string schemaName = "dbo")
         {
             // assemble ALTER TABLE statements
-            string commandText = string.Format(CultureInfo.InvariantCulture, @"{0} ADD ", AlterTable(tableName));
+            string commandText = string.Format(CultureInfo.InvariantCulture, @"{0} ADD ", AlterTable(tableName, schemaName));
             string defaultConstraintClause = GetDefaultConstraintClause(tableName, column.Name, column.DefaultValue);
             commandText += string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}NULL{3}",
                 Escape(column.Name),
@@ -116,7 +115,7 @@ namespace MigSharp.Providers
             yield return commandText;
         }
 
-        protected abstract IEnumerable<string> DropDefaultConstraint(string tableName, string columnName, bool checkIfExists);
+        protected abstract IEnumerable<string> DropDefaultConstraint(string tableName, string columnName, bool checkIfExists, string schemaName);
 
         private string GetDefaultConstraintClause(string tableName, string columnName, object value)
         {
@@ -158,83 +157,83 @@ namespace MigSharp.Providers
             return Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
-        public abstract IEnumerable<string> RenameTable(string oldName, string newName);
+        public abstract IEnumerable<string> RenameTable(string oldName, string newName, string schemaName = "dbo");
 
-        public abstract IEnumerable<string> RenameColumn(string tableName, string oldName, string newName);
+        public abstract IEnumerable<string> RenameColumn(string tableName, string oldName, string newName, string schemaName = "dbo");
 
-        public virtual IEnumerable<string> DropColumn(string tableName, string columnName)
+        public virtual IEnumerable<string> DropColumn(string tableName, string columnName, string schemaName = "dbo")
         {
-            yield return string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0}.{1} DROP COLUMN {2}", Escape(SchemaName), Escape(tableName), Escape(columnName));
+            yield return string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0}.{1} DROP COLUMN {2}", Escape(schemaName), Escape(tableName), Escape(columnName));
         }
 
-        public IEnumerable<string> AlterColumn(string tableName, Column column)
+        public IEnumerable<string> AlterColumn(string tableName, Column column, string schemaName = "dbo")
         {
             // remove any existing default value constraints (before possibly adding new ones)
-            foreach (string text in DropDefaultConstraint(tableName, column.Name, true))
+            foreach (string text in DropDefaultConstraint(tableName, column.Name, true, schemaName))
             {
                 yield return text;
             }
-            yield return AlterTable(tableName) + string.Format(CultureInfo.InvariantCulture, " ALTER COLUMN [{0}] {1} {2}NULL",
+            yield return AlterTable(tableName, schemaName) + string.Format(CultureInfo.InvariantCulture, " ALTER COLUMN [{0}] {1} {2}NULL",
                 column.Name,
                 GetTypeSpecifier(column.DataType),
                 column.IsNullable ? string.Empty : "NOT ");
             if (column.DefaultValue != null)
             {
-                yield return AlterTable(tableName) + string.Format(CultureInfo.InvariantCulture, " ADD {0} FOR {1}",
+                yield return AlterTable(tableName, schemaName) + string.Format(CultureInfo.InvariantCulture, " ADD {0} FOR {1}",
                     GetDefaultConstraintClause(tableName, column.Name, column.DefaultValue),
                     Escape(column.Name));
             }
         }
 
-        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName)
+        public IEnumerable<string> AddIndex(string tableName, IEnumerable<string> columnNames, string indexName, string schemaName = "dbo")
         {
             yield return string.Format(CultureInfo.InvariantCulture, "CREATE INDEX {0} ON {4}.{1} {2}({2}\t{3}{2}){5}",
                 Escape(indexName),
                 Escape(tableName),
                 Environment.NewLine,
                 string.Join(string.Format(CultureInfo.InvariantCulture, ",{0}\t", Environment.NewLine), columnNames.Select(Escape).ToArray()),
-                Escape(SchemaName),
+                Escape(schemaName),
                 SpecifyWith ? "WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF)" : string.Empty);
         }
 
-        public abstract IEnumerable<string> DropIndex(string tableName, string indexName);
+        public abstract IEnumerable<string> DropIndex(string tableName, string indexName, string schemaName = "dbo");
 
-        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = null)
+        public IEnumerable<string> AddForeignKey(string tableName, string referencedTableName, IEnumerable<ColumnReference> columnNames, string constraintName, string schemaName = "dbo", string referencedSchemaName = "dbo")
         {
-            yield return AlterTable(tableName) + string.Format(CultureInfo.InvariantCulture, "  ADD  CONSTRAINT [{0}] FOREIGN KEY({1}){2}REFERENCES {3}.{4} ({5})",
+            yield return AlterTable(tableName, schemaName) + string.Format(CultureInfo.InvariantCulture, "  ADD  CONSTRAINT [{0}] FOREIGN KEY({1}){2}REFERENCES {3}.{4} ({5})",
                 constraintName,
                 string.Join(", ", columnNames.Select(n => Escape(n.ColumnName)).ToArray()),
                 Environment.NewLine,
-                Escape(schemaName ?? "dbo"),
+                Escape(referencedSchemaName),
                 Escape(referencedTableName),
                 string.Join(", ", columnNames.Select(n => Escape(n.ReferencedColumnName)).ToArray()));
         }
 
-        public IEnumerable<string> DropForeignKey(string tableName, string constraintName)
+        public IEnumerable<string> DropForeignKey(string tableName, string constraintName, string schemaName = "dbo")
         {
-            yield return DropConstraint(tableName, constraintName);
+            yield return DropConstraint(tableName, constraintName, schemaName);
         }
 
-        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddPrimaryKey(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName = "dbo")
         {
-            return AddConstraint(tableName, constraintName, columnNames, "PRIMARY KEY");
+            return AddConstraint(tableName, constraintName, columnNames, "PRIMARY KEY", schemaName);
         }
 
-        public abstract IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName);
+        public abstract IEnumerable<string> RenamePrimaryKey(string tableName, string oldName, string newName, string schemaName = "dbo");
 
-        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName)
+        public IEnumerable<string> DropPrimaryKey(string tableName, string constraintName, string schemaName = "dbo")
         {
-            yield return DropConstraint(tableName, constraintName);
+            yield return DropConstraint(tableName, constraintName, schemaName);
         }
 
-        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName)
+        public IEnumerable<string> AddUniqueConstraint(string tableName, IEnumerable<string> columnNames, string constraintName, string schemaName)
         {
-            return AddConstraint(tableName, constraintName, columnNames, "UNIQUE");
+            return AddConstraint(tableName, constraintName, columnNames, "UNIQUE", schemaName);
         }
 
-        private IEnumerable<string> AddConstraint(string tableName, string constraintName, IEnumerable<string> columnNames, string constraintType)
+        private IEnumerable<string> AddConstraint(string tableName, string constraintName, IEnumerable<string> columnNames, string constraintType, string schemaName = "dbo")
         {
-            yield return AlterTable(tableName) + string.Format(CultureInfo.InvariantCulture, " ADD  CONSTRAINT [{0}] {3} {1}({1}\t{2}{1}){4}",
+            yield return AlterTable(tableName, schemaName) + string.Format(CultureInfo.InvariantCulture, " ADD  CONSTRAINT [{0}] {3} {1}({1}\t{2}{1}){4}",
                 constraintName,
                 Environment.NewLine,
                 string.Join("," + Environment.NewLine + "\t", columnNames.Select(Escape).ToArray()),
@@ -242,30 +241,30 @@ namespace MigSharp.Providers
                 SpecifyWith ? "WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF)" : string.Empty);
         }
 
-        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName)
+        public IEnumerable<string> DropUniqueConstraint(string tableName, string constraintName, string schemaName = "dbo")
         {
-            yield return DropConstraint(tableName, constraintName);
+            yield return DropConstraint(tableName, constraintName, schemaName);
         }
 
-        public IEnumerable<string> DropDefault(string tableName, Column column)
+        public IEnumerable<string> DropDefault(string tableName, Column column, string schemaName = "dbo")
         {
             Debug.Assert(column.DefaultValue == null);
-            return DropDefaultConstraint(tableName, column.Name, false);
+            return DropDefaultConstraint(tableName, column.Name, false, schemaName);
         }
 
-        protected string DropConstraint(string tableName, string constraintName)
+        protected string DropConstraint(string tableName, string constraintName, string schemaName = "dbo")
         {
-            return AlterTable(tableName) + string.Format(CultureInfo.InvariantCulture, " DROP CONSTRAINT [{0}]", constraintName);
+            return AlterTable(tableName, schemaName) + string.Format(CultureInfo.InvariantCulture, " DROP CONSTRAINT [{0}]", constraintName);
         }
 
-        private string CreateTable(string tableName)
+        private string CreateTable(string tableName, string schemaName = "dbo")
         {
-            return string.Format(CultureInfo.InvariantCulture, "CREATE TABLE {0}.{1}", Escape(SchemaName), Escape(tableName));
+            return string.Format(CultureInfo.InvariantCulture, "CREATE TABLE {0}.{1}", Escape(schemaName), Escape(tableName));
         }
 
-        private string AlterTable(string tableName)
+        private string AlterTable(string tableName, string schemaName = "dbo")
         {
-            return string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0}.{1}", Escape(SchemaName), Escape(tableName));
+            return string.Format(CultureInfo.InvariantCulture, "ALTER TABLE {0}.{1}", Escape(schemaName), Escape(tableName));
         }
 
         public string Escape(string name)

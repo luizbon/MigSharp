@@ -44,14 +44,14 @@ namespace MigSharp.Core.Commands
                 new DataType(Type, Size, Scale),
                 IsNullable,
                 DefaultValue);
-            IEnumerable<string> commands = provider.AddColumn(tableName, column);
+            IEnumerable<string> commands = provider.AddColumn(tableName, column, SchemaName);
             if (DropThereafter)
             {
                 commands = commands.Concat(provider.DropDefault(tableName, new Column(
-                    column.Name,
-                    column.DataType,
-                    column.IsNullable,
-                    null)));
+                                                                               column.Name,
+                                                                               column.DataType,
+                                                                               column.IsNullable,
+                                                                               null), SchemaName    ));
             }
             return commands;
         }

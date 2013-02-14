@@ -23,15 +23,15 @@ namespace MigSharp.Core.Commands
             AlterPrimaryKeyCommand parentAlterPrimaryKeyCommand;
             if ((parentAlterTableCommand = Parent as AlterTableCommand) != null)
             {
-                return provider.RenameTable(parentAlterTableCommand.TableName, _newName);
+                return provider.RenameTable(parentAlterTableCommand.TableName, _newName, SchemaName);
             }
             else if ((parentAlterColumnCommand = Parent as AlterColumnCommand) != null)
             {
-                return provider.RenameColumn(parentAlterColumnCommand.Parent.TableName, parentAlterColumnCommand.ColumnName, _newName);
+                return provider.RenameColumn(parentAlterColumnCommand.Parent.TableName, parentAlterColumnCommand.ColumnName, _newName, SchemaName);
             }
             else if ((parentAlterPrimaryKeyCommand = Parent as AlterPrimaryKeyCommand) != null)
             {
-                return provider.RenamePrimaryKey(parentAlterPrimaryKeyCommand.Parent.TableName, parentAlterPrimaryKeyCommand.ConstraintName, _newName);
+                return provider.RenamePrimaryKey(parentAlterPrimaryKeyCommand.Parent.TableName, parentAlterPrimaryKeyCommand.ConstraintName, _newName, SchemaName);
             }
             else
             {
